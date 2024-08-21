@@ -9,8 +9,10 @@ import torch.nn as nn
 
 import io
 
-def evaluate_positions_from_pgn_string(pgn_string):
+def evaluate_positions_from_pgn_string(pgn_string, sample_num, depth):
     # Use StringIO to mimic a file object with the PGN string
+    # TODO evaluations if new depth for analysis is requested and save in dictionary otherwise
+    # take existing evaluation from dictionary
     if isinstance(pgn_string, tuple):
         pgn_io = io.StringIO(pgn_string[0])
     else:
@@ -33,7 +35,7 @@ def evaluate_positions_from_pgn_string(pgn_string):
         board.push(move)
         
         # Evaluate the position
-        evaluation = engine.analyse(board, chess.engine.Limit(time=0.005))
+        evaluation = engine.analyse(board, chess.engine.Limit(depth=depth))
         
         # Get the evaluation score
         score = evaluation["score"].relative
