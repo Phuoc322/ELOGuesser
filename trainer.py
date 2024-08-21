@@ -2,35 +2,41 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from sklearn.metrics import f1_score
+
 from tqdm import tqdm
 
 # Define loss function and optimizer
 
-def train(model, num_epochs, loss_function=None, optimizer=None, train_dataloader=None, device='CPU'):
+def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=None, device='cpu'):
     if loss_function == None:
-        loss_function = nn.MSELoss()
+        loss_function = nn.L1Loss()
         
     if optimizer == None:
-        optimizer = optim.Adam(model.parameters(), lr=0.01)        
+        optimizer = optim.Adam(model.parameters(), lr=3)
     
-    # Example target tensor (next score prediction)
-    # In a real scenario, you'd have the actual next scores
-    # target_tensor = input_tensor[1:]  # Shifted by one
-    # input_tensor = input_tensor[:-1]  # Same length as target
-
+    epoch_loss_logger = []
+    print("\t Training progress:")
     # Training loop
     for epoch in range(num_epochs):
-        print(f"\n Epoch {epoch+1} of {num_epochs}")
         # training
         train_loss = []
         model.train()
-        print("\t Training progress: \n")
         
         #TODO change embedding length with a sequence of moves and ELO
-        for embedding, length, label in tqdm(train_dataloader):
+        for (target_white_elo, target_black_elo), evals in (train_dataloader):
+            # targets to float otherwise pytorch complains
+            target_white_elo = target_white_elo.float().squeeze()
+            target_black_elo = target_black_elo.float().squeeze()
+            # zero the grad
             optimizer.zero_grad()
-            train_prediction = model(embedding[0])
-            loss = loss_function(train_prediction[-1].squeeze(dim=0), torch.tensor(float(label[0]), device=device))
+            # input sequence with additional dimension (seq_len, 1), 1 is input size, one eval at the time
+            input_sequence = torch.FloatTensor(evals)
+            input_sequence = input_sequence[:,None]
+            pred_white_elo, pred_black_elo = model(input_sequence)[-1].squeeze(dim=0)
+            loss1 = loss_function(pred_white_elo, target_white_elo)
+            loss2 = loss_function(pred_black_elo, target_black_elo)
+            loss = loss1 + loss2
             train_loss.append(loss)
         # Backward pass and optimize
         loss.backward()
@@ -39,26 +45,31 @@ def train(model, num_epochs, loss_function=None, optimizer=None, train_dataloade
         epoch_loss_logger.append(torch.mean(torch.tensor(train_loss)))
         
         if (epoch + 1) % 10 == 0:
-            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss:.4f}')
             
-    print("\n\t Evaluation progress: \n")
+    return epoch_loss_logger, model
     
-def evaluate(model, num_epochs, loss_function=None, optimizer=None, test_dataloader=None, device='CPU'):
+def evaluate(model, test_dataloader, loss_function=None, optimizer=None, device='cpu'):
+    if loss_function == None:
+        loss_function = nn.L1Loss()
+        
     with torch.no_grad():
         model.eval()
-        predictions = []
-        targets = []
+        white_elo_predictions = []
+        black_elo_predictions = []
+        print("\n\t Evaluation progress: \n")
+        
+        for (target_white_elo, target_black_elo), evals in (test_dataloader):
+            # targets to float otherwise pytorch complains
+            target_white_elo = target_white_elo.float().squeeze()
+            target_black_elo = target_black_elo.float().squeeze()
+            
+            # input sequence with additional dimension (seq_len, 1), 1 is input size, one eval at the time
+            input_sequence = torch.FloatTensor(evals)
+            input_sequence = input_sequence[:,None]
+            pred_white_elo, pred_black_elo = model(input_sequence)[-1].squeeze(dim=0)
+            
+            white_elo_predictions.append([target_white_elo.item(), pred_white_elo.item(), loss_function(target_white_elo, pred_white_elo).item()])
+            black_elo_predictions.append([target_black_elo.item(), pred_black_elo.item(), loss_function(target_black_elo, pred_black_elo).item()])
 
-        #TODO change embedding length with a sequence of moves and ELO
-        for embedding, length, label in tqdm(test_dataloader):
-            test_prediction = round(model(embedding[0])[-1].item())
-            predictions.append(float(test_prediction))
-            targets.append(int(label[0]))
-
-
-        train_f1_score = f1_score(predictions, targets)
-        print("\t Test F1 Score in epoch " + str(epoch) + ": " + str(train_f1_score)
-            + " Train loss: " + str(epoch_loss_logger[epoch].item()))
-        epoch_f1_scores.append(train_f1_score)
-
-    return epoch_loss_logger, epoch_f1_scores
+    return white_elo_predictions, black_elo_predictions
