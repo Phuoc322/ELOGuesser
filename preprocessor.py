@@ -1,7 +1,5 @@
 import re
 
-from evaluator import *
-
 # takes PGN files of chess games and outputs the ELO of White, Black and the moves that were played
 # filters every game that does not contain either whit's or black's ELO
 def preprocess(file, output_file):
@@ -21,5 +19,3 @@ def preprocess(file, output_file):
     # Write the filtered lines to a new file
     with open(output_file, 'w') as output_file:
         output_file.write('\n'.join(matches))
-        
-preprocess("games from 100 to 2100.pgn", 'filtered_output.pgn')

@@ -23,30 +23,29 @@ def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=Non
         train_loss = []
         model.train()
         
-        #TODO change embedding length with a sequence of moves and ELO
         for (target_white_elo, target_black_elo), evals in (train_dataloader):
-            # targets to float otherwise pytorch complains
+            # targets to float and remove one dimension otherwise pytorch complains
             target_white_elo = target_white_elo.float().squeeze()
             target_black_elo = target_black_elo.float().squeeze()
-            # zero the grad
-            optimizer.zero_grad()
+            
             # input sequence with additional dimension (seq_len, 1), 1 is input size, one eval at the time
-            input_sequence = torch.FloatTensor(evals)
-            input_sequence = input_sequence[:,None]
-            pred_white_elo, pred_black_elo = model(input_sequence)[-1].squeeze(dim=0)
+            input_sequence = torch.tensor(evals)[:,None].float()
+            pred_white_elo, pred_black_elo = model(input_sequence)[-1].squeeze()
+            
+            # calculate losses and then sum up
             loss1 = loss_function(pred_white_elo, target_white_elo)
             loss2 = loss_function(pred_black_elo, target_black_elo)
             loss = loss1 + loss2
             train_loss.append(loss)
-        # Backward pass and optimize
-        loss.backward()
-        optimizer.step()
+            
+            # zero the grad
+            optimizer.zero_grad()
+            # Backward pass and optimize
+            loss.backward()
+            optimizer.step()
 
         epoch_loss_logger.append(torch.mean(torch.tensor(train_loss)))
         
-        if (epoch + 1) % 10 == 0:
-            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss:.4f}')
-            
     return epoch_loss_logger, model
     
 def evaluate(model, test_dataloader, loss_function=None, optimizer=None, device='cpu'):
@@ -65,9 +64,8 @@ def evaluate(model, test_dataloader, loss_function=None, optimizer=None, device=
             target_black_elo = target_black_elo.float().squeeze()
             
             # input sequence with additional dimension (seq_len, 1), 1 is input size, one eval at the time
-            input_sequence = torch.FloatTensor(evals)
-            input_sequence = input_sequence[:,None]
-            pred_white_elo, pred_black_elo = model(input_sequence)[-1].squeeze(dim=0)
+            input_sequence = torch.tensor(evals)[:,None].float()
+            pred_white_elo, pred_black_elo = model(input_sequence)[-1].squeeze()
             
             white_elo_predictions.append([target_white_elo.item(), pred_white_elo.item(), loss_function(target_white_elo, pred_white_elo).item()])
             black_elo_predictions.append([target_black_elo.item(), pred_black_elo.item(), loss_function(target_black_elo, pred_black_elo).item()])

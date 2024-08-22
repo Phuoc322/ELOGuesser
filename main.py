@@ -2,7 +2,6 @@ from lstm import *
 from evaluator import *
 from trainer import *
 from preprocessor import *
-from data import *
 
 import torch
 import torch.nn as nn
@@ -10,31 +9,45 @@ from torch.utils.data import DataLoader
 
 import numpy as np
 
+from sklearn.model_selection import train_test_split
+
 import matplotlib.pyplot as plt
 
 import time
 import datetime
+import os
 
 print("Initializing model...")
-# Initialize parameters
+reuse_model = False
+# Initialize model parameters
 input_size = 1
 hidden_size = 50
 output_size = 2
-num_epochs = 1
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 # Initialize model
 model = LSTM(input_size, hidden_size, output_size)
+if reuse_model == True:
+  model.load_state_dict(torch.load("model"))
+
+# Initialize rest of the parameters and functions
+data_size = 100
+depth = 15
+num_epochs = 50
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 loss_function = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=1)
 
+# Check if evaluated_positions.json is empty, if yes then initialize
+if os.stat("evaluated_positions.json").st_size == 0:
+  initialize_evaluations("evaluated_positions.json")
+
 # Create the train and test data
 print("Creating train data...")
 start = time.time()
-dataset = create_dataset(2)
+dataset = create_dataset(data_size, depth=depth)
 
-train_data = dataset[:1]
-test_data = dataset[-1:]
+train_data, test_data = train_test_split(dataset, test_size=0.20)
 
 train_dataloader = DataLoader(train_data, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
 
@@ -48,6 +61,9 @@ epoch_losses, model = train(model, num_epochs, train_dataloader, device=device)
 white_elo_predictions, black_elo_predictions = evaluate(model, test_dataloader, device=device)
 for white_elo_prediction in white_elo_predictions:
     print(white_elo_prediction)
+  
+# save model
+torch.save(model.state_dict(), "model")
     
 # for black_elo_prediction in black_elo_predictions:
 #     print(black_elo_prediction)
@@ -57,4 +73,8 @@ def visualize_data(data, title):
   plt.title(title)
   plt.show()
 
-visualize_data(epoch_losses, "Epoch losses")
+#visualize_data(epoch_losses, "Epoch losses")
+
+# TODO
+# preprocess lichess games
+# train on lichess games 
