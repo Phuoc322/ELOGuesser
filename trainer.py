@@ -22,7 +22,10 @@ def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=Non
         # training
         train_loss = []
         model.train()
-        
+        # zero the grad
+        optimizer.zero_grad()
+        loss = 0
+        num_samples = 0
         for (target_white_elo, target_black_elo), evals in (train_dataloader):
             # targets to float and remove one dimension otherwise pytorch complains
             target_white_elo = target_white_elo.float().squeeze()
@@ -35,14 +38,15 @@ def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=Non
             # calculate losses and then sum up
             loss1 = loss_function(pred_white_elo, target_white_elo)
             loss2 = loss_function(pred_black_elo, target_black_elo)
-            loss = loss1 + loss2
+            loss += loss1 + loss2
             train_loss.append(loss)
+            num_samples += 1
             
-            # zero the grad
-            optimizer.zero_grad()
-            # Backward pass and optimize
-            loss.backward()
-            optimizer.step()
+        # loss is the average loss across every sample
+        loss = torch.div(loss, num_samples)
+        # Backward pass and optimize
+        loss.backward()
+        optimizer.step()
 
         epoch_loss_logger.append(torch.mean(torch.tensor(train_loss)))
         
@@ -65,7 +69,9 @@ def evaluate(model, test_dataloader, loss_function=None, optimizer=None, device=
             
             # input sequence with additional dimension (seq_len, 1), 1 is input size, one eval at the time
             input_sequence = torch.tensor(evals)[:,None].float()
-            pred_white_elo, pred_black_elo = model(input_sequence)[-1].squeeze()
+            pred_white_elo, pred_black_elo = model(input_sequence)[-1].round()
+            pred_white_elo = pred_white_elo.squeeze()
+            pred_black_elo = pred_black_elo.squeeze()
             
             white_elo_predictions.append([target_white_elo.item(), pred_white_elo.item(), loss_function(target_white_elo, pred_white_elo).item()])
             black_elo_predictions.append([target_black_elo.item(), pred_black_elo.item(), loss_function(target_black_elo, pred_black_elo).item()])
