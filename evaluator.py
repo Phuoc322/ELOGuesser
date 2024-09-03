@@ -58,9 +58,9 @@ def evaluate_positions_from_pgn_string(pgn_string, depth):
 # print(evaluate_positions_from_pgn_string("1. e4 a5 2. Bc4 d5 3. Bxd5 c5 4. Qf3 g6 5. d3 Qd6 6. Nh3 Qd8 7. Be3 c4 8. Nc3 Nc6 9. Qxf7+ Kd7 10. Be6+ Kc7 11. Nb5+ Kb8 12. Bf4+ Ne5 13. Bxe5+ Qd6 14. Bxd6+ exd6 15. Qc7#", depth=10))
 # print(evaluate_positions_from_pgn_string("1. f3 e5 2. Na3 Qf6 3. Nb1 Bc5 4. Na3 Nc6 5. Nb1 Nh6 6. Na3 Nf5 7. Nb1 Qh4+ 8. g3 Nxg3 9. e3 Nxh1+ 10. Ke2 Nd4+ 11. exd4 Qf2+ 12. Kd3 e4+ 13. Kxe4 Qxd4+ 14. Kf5 Be7 15. a3 g6#", depth=10))
 
-def create_dataset(num_samples, depth):
+def create_dataset(pgn_file, num_samples, depth):
     dataset = []
-    with open('filtered_output.pgn', 'r') as f:
+    with open(pgn_file, 'r') as f:
         white_elo = 0
         black_elo = 0
         cnt = 0

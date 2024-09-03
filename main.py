@@ -2,13 +2,13 @@ from lstm import *
 from evaluator import *
 from trainer import *
 from preprocessor import *
-from visualize import *
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 
@@ -31,7 +31,7 @@ if reuse_model == True:
 # Initialize rest of the parameters and functions
 data_size = 500
 depth = 15
-num_epochs = 500
+num_epochs = 100
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 loss_function = nn.MSELoss()
@@ -44,7 +44,7 @@ if os.stat("evaluated_positions.json").st_size == 0:
 # Create the train and test data
 print("Creating train data...")
 start = time.time()
-dataset = create_dataset(data_size, depth=depth)
+dataset = create_dataset('filtered_output.pgn', data_size, depth=depth)
 
 train_data, test_data = train_test_split(dataset, test_size=0.10)
 
@@ -61,7 +61,7 @@ print("Time for training LSTM: " + str(datetime.timedelta(seconds=(time.time() -
 
 white_elo_predictions, black_elo_predictions = evaluate(model, test_dataloader, device=device)
 for white_elo_prediction in white_elo_predictions:
-    print(white_elo_prediction)
+  print(white_elo_prediction)
   
 # save model
 torch.save(model.state_dict(), "model")
