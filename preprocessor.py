@@ -2,6 +2,8 @@ import re
 import chess.pgn
 import os
 
+import time
+
 # takes PGN files of chess games and outputs the ELO of White, Black and the moves that were played
 # filters every game that does not contain either whit's or black's ELO
 def preprocess(file, output_file):
@@ -30,14 +32,16 @@ def preprocess_data(input_file, output_file):
 
     # create and open the output file
     with open(output_file, 'w') as out_file:
-        #i = 0
+        # iterate through all games (segments)
         while curr_game is not None:
             # check if the game has a variant
             cond1 = "Variant" not in curr_game.headers.keys()
             # check if the game ended due to time limit
             cond2 = curr_game.headers["Termination"] != "Time forfeit"
+            # check if any player is not listed (has unknown elo value)
+            cond3 = curr_game.headers["WhiteElo"] != '?' and curr_game.headers["BlackElo"] != '?'
 
-            if cond1 and cond2:
+            if cond1 and cond2 and cond3:
                 # gather all information for output file
                 elo_w_val = curr_game.headers["WhiteElo"]
                 elo_b_val = curr_game.headers["BlackElo"]
@@ -53,11 +57,9 @@ def preprocess_data(input_file, output_file):
                 out_file.write("\n")
                 out_file.write(moves + " " + res + "\n")
 
-            #if i == 20:
-            #    break
-
-            #i += 1
             curr_game = chess.pgn.read_game(pgn_file)
 
 if __name__ == "__main__":
+    start_time = time.time()
     preprocess_data("data/lichess_db_standard_rated_2013-01.pgn", "data/output.pgn")
+    print("Execution time --- %s seconds ---" % (time.time() - start_time))
