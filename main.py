@@ -29,7 +29,7 @@ if reuse_model == True:
   model.load_state_dict(torch.load("model"))
 
 # Initialize rest of the parameters and functions
-data_size = 500
+data_size = 1000
 depth = 15
 num_epochs = 100
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -44,7 +44,7 @@ if os.stat("evaluated_positions.json").st_size == 0:
 # Create the train and test data
 print("Creating train data...")
 start = time.time()
-dataset = create_dataset('filtered_output.pgn', data_size, depth=depth)
+dataset = create_dataset('data\output.pgn', data_size, depth=depth)
 
 train_data, test_data = train_test_split(dataset, test_size=0.10)
 
@@ -78,6 +78,5 @@ def visualize_data(data, title):
 visualize_data(epoch_losses, "Epoch losses")
 
 # TODO
-# preprocess lichess games
-# train on lichess games
-# https://stackoverflow.com/questions/48124604/regex-to-extract-between-start-and-end-strings-and-match-the-entire-line-contain
+# data analysis, check the elo of white and black with histogram
+# look over model architecture, LSTM and NN, and training process, stochastic minibatch
