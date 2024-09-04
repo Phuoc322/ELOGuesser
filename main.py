@@ -17,7 +17,7 @@ import datetime
 import os
 
 print("Initializing model...")
-reuse_model = False
+reuse_model = True
 # Initialize model parameters
 input_size = 1
 hidden_size = 100
@@ -64,7 +64,8 @@ for white_elo_prediction in white_elo_predictions:
   print(white_elo_prediction)
   
 # save model
-torch.save(model.state_dict(), "model")
+if reuse_model == False:
+  torch.save(model.state_dict(), "model")
     
 # for black_elo_prediction in black_elo_predictions:
 #     print(black_elo_prediction)
