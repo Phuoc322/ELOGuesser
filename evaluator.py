@@ -2,7 +2,8 @@ import chess
 import chess.engine
 import chess.pgn
 
-import numpy
+import numpy as np
+import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -13,6 +14,9 @@ import json
 
 def evaluate_positions_from_pgn_string(pgn_string, depth):
     # Use StringIO to mimic a file object with the PGN string
+    # if pgn_string.endswith('pgn'):
+    #     with open(pgn_string) as f:
+    #        pgn_io = io.StringIO(f.readline())
     if isinstance(pgn_string, tuple):
         pgn_io = io.StringIO(pgn_string[0])
     else:
@@ -118,3 +122,9 @@ def initialize_evaluations(file):
         evaluations = {"1. j0": (-1, [0])}
         # initialize with arbitrary data
         json.dump(evaluations, f, separators=(',', ': '))
+        
+def visualize_data(data, num_epochs, title):
+    x_axis = np.arange(num_epochs + 1) + 1
+    plt.plot(x_axis, data)
+    plt.title(title)
+    plt.show()

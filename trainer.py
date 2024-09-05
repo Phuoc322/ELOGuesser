@@ -6,6 +6,8 @@ from sklearn.metrics import f1_score
 
 from tqdm import tqdm
 
+from early_stopper import *
+
 # Define loss function and optimizer
 
 def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=None, device='cpu'):
@@ -13,9 +15,12 @@ def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=Non
         loss_function = nn.L1Loss()
         
     if optimizer == None:
-        optimizer = optim.Adam(model.parameters(), lr=3)
+        optimizer = optim.Adam(model.parameters(), lr=1)
+        
+    early_stopper = EarlyStopper(patience=5, min_delta=0)
     
     epoch_loss_logger = []
+    actual_num_epochs = 0
     print("\t Training progress:")
     # Training loop
     for epoch in range(num_epochs):
@@ -50,6 +55,11 @@ def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=Non
 
         epoch_loss_logger.append(torch.mean(torch.tensor(train_loss)))
         
+        if early_stopper.early_stop(loss):
+            print("Stopped after %s epochs" % epoch)
+            actual_num_epochs = epoch
+            break
+        
     return epoch_loss_logger, model
     
 def evaluate(model, test_dataloader, loss_function=None, optimizer=None, device='cpu'):
@@ -77,3 +87,4 @@ def evaluate(model, test_dataloader, loss_function=None, optimizer=None, device=
             black_elo_predictions.append([target_black_elo.item(), pred_black_elo.item(), loss_function(target_black_elo, pred_black_elo).item()])
 
     return white_elo_predictions, black_elo_predictions
+    
