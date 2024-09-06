@@ -25,21 +25,21 @@ model = LSTM(input_size, hidden_size)
 if reuse_model:
   model.load_state_dict(torch.load("model"))
 
-# Initialize rest of the parameters and functions
-data_size = 1030
-depth = 15
-num_epochs = 100
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-loss_function = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=2)
-
 # Check if evaluated_positions.json is empty, if yes then initialize
 if os.stat("evaluated_positions.json").st_size == 0:
   initialize_evaluations("evaluated_positions.json")
 
 # only create train data, if train and test is desired, tests in any case
 if not test_only:
+  # Initialize rest of the parameters and functions
+  data_size = 1030
+  depth = 15
+  num_epochs = 100
+  device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+  loss_function = nn.MSELoss()
+  optimizer = optim.Adam(model.parameters(), lr=2)
+  
   # Create the train and test data
   print("Creating train data...")
   start = time.time()
@@ -68,15 +68,23 @@ else:
   for f in os.listdir("test_games"):
     filename = os.fsdecode(f)
     # evaluate each game
-    test_data = create_dataset('test_games\\' + filename, data_size, depth=depth)
+    test_data = create_dataset('test_games\\' + filename)
     test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
-    pred_white_elo, pred_black_elo = evaluate(model, test_dataloader, device=device)
+    pred_white_elo, pred_black_elo = evaluate(model, test_dataloader)
     print("White ELO: " + str(pred_white_elo))
     print("Black ELO: " + str(pred_black_elo))
 
 # save model
 torch.save(model.state_dict(), "model")
 
-# TODO
-# data analysis, check the elo of white and black with histogram
-# look over model architecture, LSTM and NN, and training process, stochastic minibatch
+# TODO sorted by priority, if any task is too difficult, weaken the requirements or just skip task
+# 1. only look at games where both players have a maximum of 500 to 2500 ELO rating (0.2 percentile)
+# 2. only look at games with < 80 moves
+# 3. only look at which are at least 10 minutes long
+#   ist im pgn als [TimeControl "600+0"] notiert, Zahl links vom + ist Gesamtzeit in Sekunden pro Spieler, Zahl rechts davon der Inkrement, den ein Spieler bekommt, nachdem er seinen Zug macht (kann man ignorieren)
+# 4. data analysis, check the elo of white and black with histogram, balance dataset
+#   algorithmic approach:
+#     1. start with 1000 games
+#     2. build the histogram with class bins of size 50
+#     3. balance the data by adding games such that the maximum difference of the smallest and largest class has maximum difference of 10%
+# 5. look over model architecture, LSTM and NN, and training process, stochastic minibatch
