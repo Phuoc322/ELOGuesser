@@ -78,9 +78,9 @@ else:
 torch.save(model.state_dict(), "model")
 
 # TODO sorted by priority, if any task is too difficult, weaken the requirements or just skip task
-# 1. only look at games where both players have a maximum of 500 to 2500 ELO rating (0.2 percentile)
-# 2. only look at games with < 80 moves
-# 3. only look at which are at least 10 minutes long
+# DONE 1. only look at games where both players have a maximum of 500 to 2500 ELO rating (0.2 percentile)
+# DONE 2. only look at games with < 80 moves
+# DONE 3. only look at which are at least 10 minutes long
 #   ist im pgn als [TimeControl "600+0"] notiert, Zahl links vom + ist Gesamtzeit in Sekunden pro Spieler, Zahl rechts davon der Inkrement, den ein Spieler bekommt, nachdem er seinen Zug macht (kann man ignorieren)
 # 4. data analysis, check the elo of white and black with histogram, balance dataset
 #   algorithmic approach:
