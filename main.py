@@ -15,7 +15,7 @@ import os
 
 print("Initializing model...")
 reuse_model = True
-test_only = True
+test_only = False
 # Initialize model parameters
 input_size = 1
 hidden_size = 100
@@ -32,22 +32,33 @@ if os.stat("evaluated_positions.json").st_size == 0:
 # only create train data, if train and test is desired, tests in any case
 if not test_only:
   # Initialize rest of the parameters and functions
-  data_size = 1030
+  data_size = 300
   depth = 15
   num_epochs = 100
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
   loss_function = nn.MSELoss()
   optimizer = optim.Adam(model.parameters(), lr=2)
-  
+
   # Create the train and test data
   print("Creating train data...")
+  pgn_file = 'data\output_all_filter.pgn'
   start = time.time()
-  dataset = create_dataset('data\output.pgn', data_size, depth=depth)
+  dataset, num_games = create_dataset(pgn_file, data_size, depth=depth)
+
+  # balance the dataset by elo values
+  bins = 15
+  dataset, w_count, b_count = balance_dataset(dataset, bins, num_games, pgn_file, depth)
+  visualize_dataset(dataset, bins)
+
   train_data, test_data = train_test_split(dataset, test_size=0.10)
   train_dataloader = DataLoader(train_data, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
-  
   test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
+
+  # save dataloader to get fast access
+  torch.save(train_dataloader, "./dataset/train.pth")
+  torch.save(test_dataloader, "./dataset/test.pth")
+
   print("Time for data creation: " + str(datetime.timedelta(seconds=(time.time() - start))))
 
 # Train LSTM
