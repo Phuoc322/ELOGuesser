@@ -17,7 +17,7 @@ def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=Non
     if optimizer == None:
         optimizer = optim.Adam(model.parameters(), lr=1)
         
-    early_stopper = EarlyStopper(patience=5, min_delta=80)
+    early_stopper = EarlyStopper(patience=10, min_delta=10)
     
     epoch_loss_logger = []
     actual_num_epochs = 0

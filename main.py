@@ -13,7 +13,7 @@ import time
 import datetime
 import os
 
-torch.manual_seed(0)
+torch.manual_seed(42)
 print("Initializing model...")
 reuse_model = True
 test_only = True
@@ -34,9 +34,9 @@ if os.stat("evaluated_positions.json").st_size == 0:
 # only create train data, if train and test is desired, tests in any case
 if not test_only:
   # Initialize rest of the parameters and functions
-  data_size = 500
+  data_size = 1050
   depth = 15
-  num_epochs = 1000
+  num_epochs = 500
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
   loss_function = nn.MSELoss()
@@ -81,7 +81,7 @@ else:
   for f in os.listdir("test_games"):
     filename = os.fsdecode(f)
     # evaluate each game
-    #preprocess_data('test_games\\' + filename, 'test_games\\' + filename)
+    preprocess_data('test_games\\' + filename, 'test_games\\' + filename)
     test_data = create_test_sample('test_games\\' + filename)
     test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
     pred_white_elo, pred_black_elo = evaluate_on_sample(model, test_dataloader)

@@ -1,0 +1,20 @@
+[Event "Casual correspondence game"]
+[Site "https://lichess.org/8G3R8VEs"]
+[Date "2024.09.20"]
+[White "Anonymous"]
+[Black "Anonymous"]
+[Result "1-0"]
+[UTCDate "2024.09.20"]
+[UTCTime "17:06:40"]
+[WhiteElo "?"]
+[BlackElo "?"]
+[Variant "Standard"]
+[TimeControl "-"]
+[ECO "C20"]
+[Opening "Bongcloud Attack"]
+[Termination "Normal"]
+[Annotator "lichess.org"]
+
+1. e4 e5 2. Ke2 { C20 Bongcloud Attack } Ke7 3. Ke1 Ke8 4. Nf3 Nc6 5. Bc4 d6 6. c3 a6 7. d4 b5 8. Bd5 Bb7 9. dxe5 dxe5 10. Nxe5 Nxe5 11. Bxb7 Qxd1+ 12. Kxd1 Ra7 13. Bd5 Bd6 14. Be3 c5 15. Ke2 Ne7 16. f4 N5g6 17. g3 Rd7 18. Rd1 Nf8 19. Nd2 f5 20. Nb3 Nxd5 21. Rxd5 fxe4 22. Rad1 Ke7 23. Nxc5 Bxc5 24. Bxc5+ Ke6 25. f5+ Kf6 26. Rxd7 Nxd7 27. Rxd7 Kxf5 28. Rxg7 h6 29. Bd4 Re8 30. Ke3 h5 31. h3 Re6 32. g4+ hxg4 33. hxg4# { White wins by checkmate. } 1-0
+
+
