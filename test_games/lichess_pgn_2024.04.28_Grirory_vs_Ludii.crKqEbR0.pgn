@@ -1,4 +1,0 @@
-[WhiteElo "1396"]
-[BlackElo "1905"]
-
-1. e4 { [%clk 0:10:00] } 1... c6 { [%clk 0:10:00] } 2. Bc4 { [%clk 0:09:47] } { B10 Caro-Kann Defense: Hillbilly Attack } 2... d5 { [%clk 0:09:55] } 3. Bxd5 { [%clk 0:09:40] } 3... cxd5 { [%clk 0:09:55] } 4. exd5 { [%clk 0:09:37] } 4... Qxd5 { [%clk 0:09:55] } 5. Qf3 { [%clk 0:09:34] } 5... Nf6 { [%clk 0:09:49] } 6. Qf4 { [%clk 0:09:05] } 6... e5 { [%clk 0:09:40] } 7. Qg4 { [%clk 0:08:59] } 7... Bxg4 { [%clk 0:09:38] } 8. b3 { [%clk 0:08:13] } 8... Qxg2 { [%clk 0:08:56] } 9. d4 { [%clk 0:07:38] } 9... Qxh1 { [%clk 0:07:40] } 10. f3 { White offers draw } { [%clk 0:06:56] } 10... Qxg1+ { [%clk 0:05:53] } 11. Kd2 { [%clk 0:06:51] } 11... Qf2+ { [%clk 0:04:22] } 12. Kd1 { [%clk 0:06:31] } 12... Bxf3# { [%clk 0:04:20] } { Black wins by checkmate. } 0-1

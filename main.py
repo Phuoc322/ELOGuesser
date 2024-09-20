@@ -15,7 +15,7 @@ import os
 
 print("Initializing model...")
 reuse_model = True
-test_only = False
+test_only = True
 # Initialize model parameters
 input_size = 1
 hidden_size = 100
@@ -32,9 +32,9 @@ if os.stat("evaluated_positions.json").st_size == 0:
 # only create train data, if train and test is desired, tests in any case
 if not test_only:
   # Initialize rest of the parameters and functions
-  data_size = 300
+  data_size = 500
   depth = 15
-  num_epochs = 100
+  num_epochs = 1000
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
   loss_function = nn.MSELoss()
@@ -44,12 +44,12 @@ if not test_only:
   print("Creating train data...")
   pgn_file = 'data\output_all_filter.pgn'
   start = time.time()
-  dataset, num_games = create_dataset(pgn_file, data_size, depth=depth)
+  dataset = create_dataset(pgn_file, data_size, depth=depth)
 
   # balance the dataset by elo values
-  bins = 15
-  dataset, w_count, b_count = balance_dataset(dataset, bins, num_games, pgn_file, depth)
-  visualize_dataset(dataset, bins)
+  # bins = 15
+  # dataset, w_count, b_count = balance_dataset(dataset, bins, data_size, pgn_file, depth)
+  # visualize_dataset(dataset, bins)
 
   train_data, test_data = train_test_split(dataset, test_size=0.10)
   train_dataloader = DataLoader(train_data, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
@@ -89,9 +89,9 @@ else:
 torch.save(model.state_dict(), "model")
 
 # TODO sorted by priority, if any task is too difficult, weaken the requirements or just skip task
-# DONE 1. only look at games where both players have a maximum of 500 to 2500 ELO rating (0.2 percentile)
-# DONE 2. only look at games with < 80 moves
-# DONE 3. only look at which are at least 10 minutes long
+# wollen eine Funktion haben die uns für ein komplettes PGN die vier wichtigen tags zurückgibt
+# hyperparameter search
+# balancing
 #   ist im pgn als [TimeControl "600+0"] notiert, Zahl links vom + ist Gesamtzeit in Sekunden pro Spieler, Zahl rechts davon der Inkrement, den ein Spieler bekommt, nachdem er seinen Zug macht (kann man ignorieren)
 # 4. data analysis, check the elo of white and black with histogram, balance dataset
 #   algorithmic approach:
