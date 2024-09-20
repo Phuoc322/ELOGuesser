@@ -13,6 +13,7 @@ import time
 import datetime
 import os
 
+torch.manual_seed(0)
 print("Initializing model...")
 reuse_model = True
 test_only = True
@@ -84,8 +85,8 @@ else:
     test_data = create_test_sample('test_games\\' + filename)
     test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
     pred_white_elo, pred_black_elo = evaluate_on_sample(model, test_dataloader)
-    print("White ELO: " + str(pred_white_elo))
-    print("Black ELO: " + str(pred_black_elo))
+    print("Predicted ELO of White: " + str(pred_white_elo))
+    print("Predicted ELO of Black: " + str(pred_black_elo))
 
 # save model
 if not reuse_model and not test_only:

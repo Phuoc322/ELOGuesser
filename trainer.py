@@ -17,7 +17,7 @@ def train(model, num_epochs, train_dataloader, loss_function=None, optimizer=Non
     if optimizer == None:
         optimizer = optim.Adam(model.parameters(), lr=1)
         
-    early_stopper = EarlyStopper(patience=5, min_delta=0)
+    early_stopper = EarlyStopper(patience=5, min_delta=80)
     
     epoch_loss_logger = []
     actual_num_epochs = 0
@@ -90,7 +90,7 @@ def evaluate(model, test_dataloader, loss_function=None, optimizer=None, device=
 
 def evaluate_on_sample(model, test_dataloader, loss_function=None, optimizer=None, device='cpu'):     
     with torch.no_grad():
-        model.eval()        
+        model.eval()
         for evals in (test_dataloader):
             # input sequence with additional dimension (seq_len, 1), 1 is input size, one eval at the time
             input_sequence = evals.clone().detach()[:,None].float()
