@@ -84,6 +84,19 @@ def create_dataset(pgn_file, num_samples=1, depth=15):
                 
     return dataset
 
+def create_test_sample(pgn_file, num_samples=1, depth=15):
+    test_sample = []
+    with open(pgn_file, 'r') as f:
+        white_elo = 0
+        black_elo = 0
+        for i, line in enumerate(f):
+            if i % 4 == 3:
+                # pgn_string and analysing depth 
+                test_sample = evaluate_positions_from_pgn_string(line[:-1], depth)
+            if i == num_samples * 4:
+                break
+    return test_sample
+
 def save_evaluations(pgn_string, depth, evaluation):
     # dictionary with evaluations for each game
     # key: pgn_string

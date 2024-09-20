@@ -83,7 +83,7 @@ def preprocess_data(input_file, output_file):
                 game_time >= 600
             ]
 
-            if all(conditions):
+            if True:
                 # gather all information for output file
                 elo_w_val = curr_game.headers["WhiteElo"]
                 elo_b_val = curr_game.headers["BlackElo"]

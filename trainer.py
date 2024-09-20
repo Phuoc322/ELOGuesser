@@ -87,4 +87,15 @@ def evaluate(model, test_dataloader, loss_function=None, optimizer=None, device=
             black_elo_predictions.append([target_black_elo.item(), pred_black_elo.item(), loss_function(target_black_elo, pred_black_elo).item()])
 
     return white_elo_predictions, black_elo_predictions
-    
+
+def evaluate_on_sample(model, test_dataloader, loss_function=None, optimizer=None, device='cpu'):     
+    with torch.no_grad():
+        model.eval()        
+        for evals in (test_dataloader):
+            # input sequence with additional dimension (seq_len, 1), 1 is input size, one eval at the time
+            input_sequence = evals.clone().detach()[:,None].float()
+            pred_white_elo, pred_black_elo = model(input_sequence)[-1].round()
+            pred_white_elo = pred_white_elo.squeeze().long().item()
+            pred_black_elo = pred_black_elo.squeeze().long().item()
+
+    return pred_white_elo, pred_black_elo

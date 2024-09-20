@@ -24,6 +24,7 @@ hidden_size = 100
 model = LSTM(input_size, hidden_size)
 if reuse_model:
   model.load_state_dict(torch.load("model"))
+  model.eval()
 
 # Check if evaluated_positions.json is empty, if yes then initialize
 if os.stat("evaluated_positions.json").st_size == 0:
@@ -62,7 +63,7 @@ if not test_only:
   print("Time for data creation: " + str(datetime.timedelta(seconds=(time.time() - start))))
 
 # Train LSTM
-  print("Train LSTM")
+  print("Train LSTM...")
   start = time.time()
   if not reuse_model:
     epoch_losses, model = train(model, num_epochs, train_dataloader, device=device)
@@ -74,19 +75,21 @@ if not test_only:
     print(white_elo_prediction)
   
 else:
-  print("Test LSTM")
+  print("Test LSTM...")
   # iterate through files in test games
   for f in os.listdir("test_games"):
     filename = os.fsdecode(f)
     # evaluate each game
-    test_data = create_dataset('test_games\\' + filename)
+    #preprocess_data('test_games\\' + filename, 'test_games\\' + filename)
+    test_data = create_test_sample('test_games\\' + filename)
     test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
-    pred_white_elo, pred_black_elo = evaluate(model, test_dataloader)
+    pred_white_elo, pred_black_elo = evaluate_on_sample(model, test_dataloader)
     print("White ELO: " + str(pred_white_elo))
     print("Black ELO: " + str(pred_black_elo))
 
 # save model
-torch.save(model.state_dict(), "model")
+if not reuse_model and not test_only:
+  torch.save(model.state_dict(), "model")
 
 # TODO sorted by priority, if any task is too difficult, weaken the requirements or just skip task
 # wollen eine Funktion haben die uns für ein komplettes PGN die vier wichtigen tags zurückgibt
